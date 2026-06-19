@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Sandwich Summer Blast — Pitching Planner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a1628;
+    color: #f0f4ff;
+    font-family: 'Inter', sans-serif;
+    padding: 20px 14px 60px;
+  }
+
+  header { text-align: center; margin-bottom: 20px; }
+  .eyebrow { font-size: 11px; letter-spacing: 3px; color: #e8c84a; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1.5px; color: #fff; line-height: 1.1; margin-bottom: 6px; }
+  .subtitle { font-size: 11px; color: #4a6080; line-height: 1.6; }
+
+  /* Rules bar */
+  .rules-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .rule-chip {
+    background: #0d1a2e;
+    border: 1px solid #1e2e4a;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 11px;
+    color: #7a90b8;
+  }
+  .rule-chip strong { color: #e8c84a; display: block; margin-bottom: 2px; font-size: 12px; }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px 14px;
+    margin-bottom: 18px; justify-content: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #7a90b8; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  /* Pitcher card */
+  .card {
+    background: #0d1a2e;
+    border: 1px solid #1e2e4a;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: #111f38;
+    border-bottom: 1px solid #1e2e4a;
+  }
+
+  .pitcher-info { display: flex; align-items: center; gap: 10px; }
+  .pitcher-name { font-weight: 700; font-size: 16px; color: #fff; }
+
+  .rating-badge {
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .r5 { background: rgba(232,200,74,0.2); color: #e8c84a; border: 1px solid rgba(232,200,74,0.4); }
+  .r4 { background: rgba(91,163,245,0.2); color: #5ba3f5; border: 1px solid rgba(91,163,245,0.4); }
+  .r35 { background: rgba(126,203,161,0.2); color: #7ecba1; border: 1px solid rgba(126,203,161,0.4); }
+
+  .weekly-summary {
+    text-align: right;
+    font-size: 11px;
+    color: #4a6080;
+  }
+  .weekly-summary .inn-count {
+    font-size: 18px;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .inn-count.ok { color: #5ba3f5; }
+  .inn-count.warn { color: #e8c84a; }
+  .inn-count.over { color: #e05555; }
+
+  /* Game rows */
+  .game-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid #1e2e4a;
+    gap: 10px;
+  }
+  .game-row:last-child { border-bottom: none; }
+  .game-row.locked { opacity: 0.5; pointer-events: none; }
+
+  .game-info { flex: 1; min-width: 0; }
+  .game-day { font-family: 'Bebas Neue', sans-serif; font-size: 12px; letter-spacing: 1.5px; color: #e8c84a; }
+  .game-matchup { font-size: 12px; color: #f0f4ff; font-weight: 600; }
+  .game-time { font-size: 10px; color: #4a6080; margin-top: 1px; }
+
+  .inn-control {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+  }
+
+  .inn-btn {
+    width: 30px; height: 30px;
+    background: #1a2d4a;
+    border: 1px solid #2a3f5f;
+    color: #7a90b8;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .inn-btn:first-child { border-radius: 8px 0 0 8px; }
+  .inn-btn:last-child { border-radius: 0 8px 8px 0; }
+  .inn-btn:active { background: #253d5e; }
+  .inn-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .inn-display {
+    min-width: 42px;
+    height: 30px;
+    background: #0a1628;
+    border-top: 1px solid #2a3f5f;
+    border-bottom: 1px solid #2a3f5f;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .inn-label { font-size: 8px; color: #4a6080; font-weight: 400; letter-spacing: 0.5px; }
+
+  .locked-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: rgba(224,85,85,0.08);
+    color: #e05555;
+    border: 1px solid rgba(224,85,85,0.2);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .rest-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    color: #3a5070;
+    border: 1px solid rgba(255,255,255,0.06);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* Violation alert */
+  .violation {
+    margin: 0 14px 10px;
+    background: rgba(224,85,85,0.1);
+    border: 1px solid rgba(224,85,85,0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: #e05555;
+    display: none;
+  }
+  .violation.show { display: block; }
+
+  /* Daily cap bar */
+  .daily-bar {
+    padding: 6px 14px 10px;
+    border-bottom: 1px solid #1e2e4a;
+    font-size: 10px;
+    color: #4a6080;
+  }
+  .daily-bar-label { margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .bar-track { height: 4px; background: #1e2e4a; border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.2s, background 0.2s; }
+
+  .reset-btn {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid #1e2e4a;
+    border-radius: 10px;
+    color: #4a6080;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .reset-btn:active { background: #0d1a2e; color: #7a90b8; }
+
+  /* Game counters */
+  .game-counters {
+    margin-bottom: 18px;
+  }
+  .game-counters-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #4a6080;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .game-counter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .game-counter-item {
+    background: #0d1a2e;
+    border: 1px solid #1e2e4a;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .gc-label {
+    flex: 1;
+    min-width: 0;
+  }
+  .gc-game { font-size: 11px; font-weight: 600; color: #f0f4ff; }
+  .gc-matchup { font-size: 10px; color: #4a6080; }
+  .gc-bar-wrap { width: 80px; }
+  .gc-bar-track {
+    height: 6px;
+    background: #1e2e4a;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 3px;
+  }
+  .gc-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.2s, background 0.2s;
+  }
+  .gc-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+    min-width: 36px;
+    text-align: right;
+    line-height: 1;
+  }
+  .gc-count.full { color: #7ecba1; }
+  .gc-count.mid { color: #e8c84a; }
+  .gc-count.low { color: #4a6080; }
+
+  .gc-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gc-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .gc-pitchers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #1e2e4a;
+  }
+  .gc-pitchers-empty {
+    font-size: 10px;
+    color: #3a5070;
+    font-style: italic;
+  }
+  .gc-pitcher-chip {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(91,163,245,0.12);
+    color: #5ba3f5;
+    border: 1px solid rgba(91,163,245,0.25);
+  }
+  .gc-pitcher-inn {
+    font-weight: 400;
+    color: #4a6080;
+    margin-left: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">⚾ Interactive Pitching Planner</div>
+  <h1>2026 Sandwich<br>Summer Blast</h1>
+  <p class="subtitle">Tap +/− to assign innings · Rules enforced automatically</p>
+</header>
+
+<div class="rules-bar">
+  <div class="rule-chip"><strong>9-Inn Weekly Cap</strong>Wed–Mon total per pitcher</div>
+  <div class="rule-chip"><strong>6-Inn Daily Cap</strong>Per pitcher per day</div>
+  <div class="rule-chip"><strong>No Consecutive Games</strong>1 pitch = next game locked</div>
+  <div class="rule-chip"><strong>Sunday Elimination</strong>Win & advance · up to 4 games</div>
+</div>
+
+<div id="game-counters"></div>
+<div id="app"></div>
+
+<button class="reset-btn" onclick="resetAll()">↺ Reset All Innings</button>
+
+<script>
+const GAMES = [
+  { id: 'fri1', label: 'FRI 6/26', matchup: 'vs Canton 9U', time: '5:30 PM · AL2', day: 'fri' },
+  { id: 'sat1', label: 'SAT 6/27', matchup: 'vs Sandwich 9U', time: '8:00 AM · AL2', day: 'sat' },
+  { id: 'sat2', label: 'SAT 6/27', matchup: 'vs Westwood 9U', time: '2:00 PM · AL3', day: 'sat' },
+  { id: 'sun1', label: 'SUN 6/28', matchup: 'Elim — Game 1', time: 'TBD · Field', day: 'sun' },
+  { id: 'sun2', label: 'SUN 6/28', matchup: 'Elim — Game 2', time: 'TBD · Field', day: 'sun' },
+  { id: 'sun3', label: 'SUN 6/28', matchup: 'Elim — Game 3', time: 'TBD · Field', day: 'sun' },
+  { id: 'sun4', label: 'SUN 6/28', matchup: 'Elim — Game 4', time: 'TBD · Field', day: 'sun' },
+];
+
+const PITCHERS = [
+  { id: 'henry', name: 'Henry', rating: '5.0', rClass: 'r5' },
+  { id: 'wiley', name: 'Wiley', rating: '4.0', rClass: 'r4' },
+  { id: 'joey',  name: 'Joey',  rating: '4.0', rClass: 'r4' },
+  { id: 'bodhi', name: 'Bodhi', rating: '3.5', rClass: 'r35' },
+  { id: 'finn',  name: 'Finn',  rating: '3.5', rClass: 'r35' },
+  { id: 'cody',  name: 'Cody',  rating: '3.5', rClass: 'r35' },
+];
+
+// innings[pitcherId][gameId] = number
+const innings = {};
+PITCHERS.forEach(p => {
+  innings[p.id] = {};
+  GAMES.forEach(g => innings[p.id][g.id] = 0);
+});
+
+function isLockedOut(pitcherId, gameIndex) {
+  if (gameIndex === 0) return false;
+  const prevGame = GAMES[gameIndex - 1];
+  return innings[pitcherId][prevGame.id] > 0;
+}
+
+function weeklyTotal(pitcherId) {
+  return GAMES.reduce((sum, g) => sum + innings[pitcherId][g.id], 0);
+}
+
+function dailyTotal(pitcherId, day) {
+  return GAMES.filter(g => g.day === day).reduce((sum, g) => sum + innings[pitcherId][g.id], 0);
+}
+
+function getViolations(pitcherId) {
+  const violations = [];
+  if (weeklyTotal(pitcherId) > 9) violations.push('Exceeds 9-inning weekly cap');
+  ['fri','sat','sun'].forEach(day => {
+    const dt = dailyTotal(pitcherId, day);
+    if (dt > 6) violations.push(`Exceeds 6-inning daily cap on ${day.toUpperCase()}`);
+  });
+  GAMES.forEach((g, i) => {
+    if (i > 0 && innings[pitcherId][g.id] > 0 && isLockedOut(pitcherId, i)) {
+      violations.push(`Cannot pitch consecutive games (${GAMES[i-1].matchup} → ${g.matchup})`);
+    }
+  });
+  return violations;
+}
+
+function changeInnings(pitcherId, gameId, delta) {
+  const gameIndex = GAMES.findIndex(g => g.id === gameId);
+  const current = innings[pitcherId][gameId];
+  const next = current + delta;
+  if (next < 0 || next > 6) return;
+  innings[pitcherId][gameId] = next;
+  render();
+}
+
+function resetAll() {
+  PITCHERS.forEach(p => GAMES.forEach(g => innings[p.id][g.id] = 0));
+  render();
+}
+
+function gameTotal(gameId) {
+  return PITCHERS.reduce((sum, p) => sum + innings[p.id][gameId], 0);
+}
+
+function renderGameCounters() {
+  const items = GAMES.map(g => {
+    const total = gameTotal(g.id);
+    const pct = Math.min((total / 6) * 100, 100);
+    const barColor = total >= 6 ? '#7ecba1' : total >= 4 ? '#e8c84a' : '#5ba3f5';
+    const countClass = total >= 6 ? 'full' : total >= 3 ? 'mid' : 'low';
+    const pitchersInGame = PITCHERS
+      .filter(p => innings[p.id][g.id] > 0)
+      .map(p => `<span class="gc-pitcher-chip">${p.name} <span class="gc-pitcher-inn">${innings[p.id][g.id]}inn</span></span>`)
+      .join('');
+    const pitchersHtml = pitchersInGame
+      ? `<div class="gc-pitchers">${pitchersInGame}</div>`
+      : `<div class="gc-pitchers gc-pitchers-empty">No pitchers assigned</div>`;
+    return `
+      <div class="game-counter-item">
+        <div class="gc-top">
+          <div class="gc-label">
+            <div class="gc-game">${g.label} · ${g.matchup}</div>
+            <div class="gc-matchup">${g.time}</div>
+          </div>
+          <div class="gc-right">
+            <div class="gc-bar-wrap">
+              <div class="gc-bar-track">
+                <div class="gc-bar-fill" style="width:${pct}%;background:${barColor}"></div>
+              </div>
+            </div>
+            <div class="gc-count ${countClass}">${total}/6</div>
+          </div>
+        </div>
+        ${pitchersHtml}
+      </div>`;
+  }).join('');
+
+  document.getElementById('game-counters').innerHTML = `
+    <div class="game-counters">
+      <div class="game-counters-title">Innings Assigned Per Game</div>
+      <div class="game-counter-row">${items}</div>
+    </div>`;
+}
+
+function render() {
+  renderGameCounters();
+  const app = document.getElementById('app');
+  app.innerHTML = PITCHERS.map(p => renderPitcher(p)).join('');
+}
+
+function renderPitcher(p) {
+  const weekly = weeklyTotal(p.id);
+  const violations = getViolations(p.id);
+  const countClass = weekly > 9 ? 'over' : weekly >= 7 ? 'warn' : 'ok';
+
+  const gameRows = GAMES.map((g, i) => {
+    const locked = isLockedOut(p.id, i);
+    const inn = innings[p.id][g.id];
+    const dayTotal = dailyTotal(p.id, g.day);
+
+    if (locked) {
+      return `
+        <div class="game-row locked">
+          <div class="game-info">
+            <div class="game-day">${g.label}</div>
+            <div class="game-matchup">${g.matchup}</div>
+            <div class="game-time">${g.time}</div>
+          </div>
+          <div class="locked-badge">🔒 Locked Out</div>
+        </div>`;
+    }
+
+    const canInc = inn < 6 && weekly < 9 && dayTotal < 6;
+    const canDec = inn > 0;
+
+    const barPct = Math.min((dayTotal / 6) * 100, 100);
+    const barColor = dayTotal > 6 ? '#e05555' : dayTotal >= 5 ? '#e8c84a' : '#5ba3f5';
+
+    return `
+      <div class="game-row">
+        <div class="game-info">
+          <div class="game-day">${g.label}</div>
+          <div class="game-matchup">${g.matchup}</div>
+          <div class="game-time">${g.time}</div>
+        </div>
+        <div class="inn-control">
+          <button class="inn-btn" ${canDec ? '' : 'disabled'} onclick="changeInnings('${p.id}','${g.id}',-1)">−</button>
+          <div class="inn-display">
+            ${inn}<div class="inn-label">inn</div>
+          </div>
+          <button class="inn-btn" ${canInc ? '' : 'disabled'} onclick="changeInnings('${p.id}','${g.id}',1)">+</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  const violationHtml = violations.length > 0
+    ? `<div class="violation show">⚠️ ${violations.join(' · ')}</div>`
+    : '';
+
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="pitcher-info">
+          <div class="pitcher-name">${p.name}</div>
+        </div>
+        <div class="weekly-summary">
+          <div class="inn-count ${countClass}">${weekly}/9</div>
+          <div>weekly inn</div>
+        </div>
+      </div>
+      ${violationHtml}
+      ${gameRows}
+    </div>`;
+}
+
+render();
+</script>
+</body>
+</html>
